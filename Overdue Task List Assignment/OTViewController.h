@@ -7,7 +7,20 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "OTAddTaskViewController.h"
+#import "OTDetailTaskViewController.h"
+#import "OTTask.h"
 
-@interface OTViewController : UIViewController
+@interface OTViewController : UIViewController <OTAddTaskViewControllerDelegate, UITableViewDataSource, UITableViewDelegate, OTDetailTaskViewControllerDelegate>
+
+// Properties
+@property (strong, nonatomic) NSMutableArray *taskObjects;
+
+// IBOutlets
+@property (weak, nonatomic) IBOutlet UITableView *tableView;
+
+// IBActions
+- (IBAction)reorderButtonPressed:(UIBarButtonItem *)sender;
+- (IBAction)addTaskButtonPressed:(UIBarButtonItem *)sender;
 
 @end
