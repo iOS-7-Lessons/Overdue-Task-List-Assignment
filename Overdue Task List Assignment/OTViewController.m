@@ -9,6 +9,7 @@
 #import "OTViewController.h"
 #import "OTAddTaskViewController.h"
 #import "OTDetailTaskViewController.h"
+#import "UnderLineLabel.h"
 
 @interface OTViewController ()
 
@@ -33,6 +34,15 @@
     
     self.tableView.dataSource = self;
     self.tableView.delegate = self;
+    
+    // Adjust background
+    self.tableView.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"background-image.jpg"]];
+    
+    // Make navigation bar transparent
+    [self.navigationController.navigationBar setBackgroundImage:[[UIImage alloc] init]
+                             forBarMetrics:UIBarMetricsDefault];
+    self.navigationController.navigationBar.shadowImage = [[UIImage alloc] init];
+    self.navigationController.navigationBar.translucent = YES;
 }
 
 - (void)didReceiveMemoryWarning
@@ -140,9 +150,20 @@
     
     BOOL isOverDue = [self isDateGreaterThanDate:currentDate and:endDate];
     
-    if ( task.isCompleted ) cell.backgroundColor = [UIColor greenColor];
-    else if ( isOverDue ) cell.backgroundColor = [UIColor redColor];
-    else cell.backgroundColor = [UIColor yellowColor];
+    if ( task.isCompleted ) cell.backgroundColor = [self colorWithR:255.0 G:0.0 B:0.0 A:0.1];
+    else if ( isOverDue ) cell.backgroundColor = [self colorWithR:0.0 G:0.0 B:0.0 A:0.5];
+    else cell.backgroundColor = [self colorWithR:0.0 G:0.0 B:0.0 A:0.0];
+    
+    // Customize accessory disclosure
+    UIImage *image = [UIImage   imageNamed:@"info-35.png"];
+    UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
+    CGRect frame = CGRectMake(44.0, 44.0, image.size.width, image.size.height);
+    button.frame = frame;
+    [button setBackgroundImage:image forState:UIControlStateNormal];
+    
+    [button addTarget:self action:@selector(accessoryButtonTapped:event:)  forControlEvents:UIControlEventTouchUpInside];
+    button.backgroundColor = [UIColor clearColor];
+    cell.accessoryView = button;
     
     return cell;
 }
@@ -276,6 +297,23 @@
     // Save array into NSUserDefaults
     [[NSUserDefaults standardUserDefaults] setObject:tasksArray forKey:ARRAY_OF_TASK_DICTIONARIES];
     [[NSUserDefaults standardUserDefaults] synchronize];
+}
+
+- (void)accessoryButtonTapped:(id)sender event:(id)event
+{
+	NSSet *touches = [event allTouches];
+	UITouch *touch = [touches anyObject];
+	CGPoint currentTouchPosition = [touch locationInView:self.tableView];
+	NSIndexPath *indexPath = [self.tableView indexPathForRowAtPoint: currentTouchPosition];
+	if (indexPath != nil)
+		
+	{
+        [self tableView: self.tableView accessoryButtonTappedForRowWithIndexPath: indexPath];
+	}
+}
+
+- (UIColor *)colorWithR:(CGFloat)red G:(CGFloat)green B:(CGFloat)blue A:(CGFloat)alpha {
+    return [UIColor colorWithRed:(red/255.0) green:(green/255.0) blue:(blue/255.0) alpha:alpha];
 }
 
 @end

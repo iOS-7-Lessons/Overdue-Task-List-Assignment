@@ -32,6 +32,9 @@
     self.titleLabel.text = self.taskFromSegue.title;
     self.descriptionLabel.text = self.taskFromSegue.description;
     self.dateLabel.text = [self convertDateIntoString:self.taskFromSegue.date];
+    
+    // Adjust background
+    self.view.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"background-image.jpg"]];
 }
 
 - (void)didReceiveMemoryWarning

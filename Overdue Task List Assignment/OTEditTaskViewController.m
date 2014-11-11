@@ -35,6 +35,16 @@
     // Assinging the self to delegates
     self.taskTitleTextField.delegate = self;
     self.descriptionTextView.delegate = self;
+    
+    // Adjust background
+    self.view.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"background-image.jpg"]];
+    
+    // Adjust outlets' borders
+    self.taskTitleTextField.layer.borderWidth = 1.0;
+    self.taskTitleTextField.layer.borderColor = [[UIColor darkGrayColor] CGColor];
+    self.descriptionTextView.layer.borderWidth = 1.0;
+    self.descriptionTextView.layer.borderColor = [[UIColor darkGrayColor] CGColor];
+    //self.dateDatePicker.layer.borderWidth = 1.0;
 }
 
 - (void)didReceiveMemoryWarning

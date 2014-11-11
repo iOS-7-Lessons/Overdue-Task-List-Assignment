@@ -31,6 +31,19 @@
     // Assigning self to delegates.
     self.taskNameTextField.delegate = self;
     self.descriptionTextView.delegate = self;
+    
+    // Adjust background
+    self.view.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"background-image.jpg"]];
+    
+    // Adjust outlets' borders
+    self.taskNameTextField.layer.borderWidth = 1.0;
+    self.taskNameTextField.layer.borderColor = [[UIColor darkGrayColor] CGColor];
+    self.descriptionTextView.layer.borderWidth = 1.0;
+    self.descriptionTextView.layer.borderColor = [[UIColor darkGrayColor] CGColor];
+    //self.dueDatePicker.layer.borderWidth = 1.0;
+    
+    // Adjust textField's tint
+    [[UITextField appearance] setTintColor:[UIColor whiteColor]];
 }
 
 - (void)didReceiveMemoryWarning
@@ -79,5 +92,6 @@
     
     return YES;
 }
+
 
 @end
