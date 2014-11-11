@@ -27,6 +27,10 @@
 {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
+    
+    // Assigning self to delegates.
+    self.taskNameTextField.delegate = self;
+    self.descriptionTextView.delegate = self;
 }
 
 - (void)didReceiveMemoryWarning
@@ -56,4 +60,24 @@
     
     return taskObject;
 }
+
+#pragma mark - UITextFieldDelegate
+
+- (BOOL)textFieldShouldReturn:(UITextField *)textField
+{
+    [self.taskNameTextField resignFirstResponder];
+    return YES;
+}
+
+#pragma mark - UITextViewDelegate
+
+- (BOOL)textView:(UITextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text
+{
+    if ( [text isEqualToString:@"\n"] ) {
+        [textView resignFirstResponder];
+    }
+    
+    return YES;
+}
+
 @end

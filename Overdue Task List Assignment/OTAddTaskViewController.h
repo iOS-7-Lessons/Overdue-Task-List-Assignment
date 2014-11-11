@@ -16,7 +16,7 @@
 
 @end
 
-@interface OTAddTaskViewController : UIViewController
+@interface OTAddTaskViewController : UIViewController <UITextFieldDelegate, UITextViewDelegate>
 
 // Delegate
 @property (weak, nonatomic) id <OTAddTaskViewControllerDelegate> delegate;

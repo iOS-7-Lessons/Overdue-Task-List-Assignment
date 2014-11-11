@@ -17,7 +17,7 @@
 
 @end
 
-@interface OTEditTaskViewController : UIViewController
+@interface OTEditTaskViewController : UIViewController <UITextFieldDelegate, UITextViewDelegate>
 
 // Delegate property
 @property (weak, nonatomic) id <OTEditTaskViewControllerDelegate> delegate;

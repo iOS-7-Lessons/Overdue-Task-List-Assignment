@@ -26,11 +26,15 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    
     // Do any additional setup after loading the view.
     self.taskTitleTextField.text = self.taskFromSegue.title;
     self.descriptionTextView.text = self.taskFromSegue.description;
     self.dateDatePicker.date = self.taskFromSegue.date;
     
+    // Assinging the self to delegates
+    self.taskTitleTextField.delegate = self;
+    self.descriptionTextView.delegate = self;
 }
 
 - (void)didReceiveMemoryWarning
@@ -52,6 +56,25 @@
 - (void)updateTask
 {
     [self.delegate updateTask];
+}
+
+#pragma mark - UITextFieldDelegate
+
+- (BOOL)textFieldShouldReturn:(UITextField *)textField
+{
+    [self.taskTitleTextField resignFirstResponder];
+    return YES;
+}
+
+#pragma mark - UITextViewDelegate
+
+- (BOOL)textView:(UITextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text
+{
+    if ( [text isEqualToString:@"\n"] ) {
+        [textView resignFirstResponder];
+    }
+    
+    return YES;
 }
 
 @end
