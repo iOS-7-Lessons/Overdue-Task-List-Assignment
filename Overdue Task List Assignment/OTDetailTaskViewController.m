@@ -68,6 +68,10 @@
     [self performSegueWithIdentifier:@"toEditTaskViewController" sender:sender];
 }
 
+- (IBAction)changeCompleteStatusButtonPressed:(UIButton *)sender {
+    
+}
+
 #pragma mark - Helper Methods
 
 - (NSString *)convertDateIntoString:(NSDate *)date

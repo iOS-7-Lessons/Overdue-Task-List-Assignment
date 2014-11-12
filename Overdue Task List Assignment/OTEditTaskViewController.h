@@ -12,7 +12,6 @@
 @protocol OTEditTaskViewControllerDelegate <NSObject>
 
 @required;
-
 - (void)updateTask;
 
 @end

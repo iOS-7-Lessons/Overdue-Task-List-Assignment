@@ -30,6 +30,7 @@
 
 // IBAction
 - (IBAction)editBarButtonPressed:(UIBarButtonItem *)sender;
+- (IBAction)changeCompleteStatusButtonPressed:(UIButton *)sender;
 
 // Properties
 @property (strong, nonatomic) OTTask *taskFromSegue;
