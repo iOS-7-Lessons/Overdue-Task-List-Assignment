@@ -29,7 +29,7 @@
     
     // Do any additional setup after loading the view.
     self.taskTitleTextField.text = self.taskFromSegue.title;
-    self.descriptionTextView.text = self.taskFromSegue.description;
+    self.descriptionTextView.text = self.taskFromSegue.desc;
     self.dateDatePicker.date = self.taskFromSegue.date;
     
     // Assinging the self to delegates
@@ -59,7 +59,7 @@
 - (IBAction)saveButtonPressed:(UIBarButtonItem *)sender {
     
     self.taskFromSegue.title = self.taskTitleTextField.text;
-    self.taskFromSegue.description = self.descriptionTextView.text;
+    self.taskFromSegue.desc = self.descriptionTextView.text;
     self.taskFromSegue.date = self.dateDatePicker.date;
     
     [self updateTask];

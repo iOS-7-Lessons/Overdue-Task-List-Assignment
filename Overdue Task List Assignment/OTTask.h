@@ -11,7 +11,7 @@
 @interface OTTask : NSObject
 
 @property (strong, nonatomic) NSString *title;
-@property (strong, nonatomic) NSString *description;
+@property (strong, nonatomic) NSString *desc;
 @property (strong, nonatomic) NSDate *date;
 @property (nonatomic) BOOL isCompleted;
 

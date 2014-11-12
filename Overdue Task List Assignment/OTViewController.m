@@ -379,6 +379,7 @@
             [label setText:[NSString stringWithFormat:@"Incompleted Tasks"]];
             break;
     }
+    label.textColor = [UIColor grayColor];
     return label;
 }
 
@@ -415,7 +416,7 @@
 - (NSDictionary *)taskObjectAsAPropertyList:(OTTask *)taskObject
 {
     NSDictionary *dictionary = @{TASK_TITLE: taskObject.title,
-                                 TASK_DESCRIPTION: taskObject.description,
+                                 TASK_DESCRIPTION: taskObject.desc,
                                  TASK_DATE: taskObject.date,
                                  TASK_COMPLETION: @(taskObject.isCompleted)};
     

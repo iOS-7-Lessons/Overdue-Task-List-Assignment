@@ -30,7 +30,7 @@
     // Do any additional setup after loading the view.
     
     self.titleLabel.text = self.taskFromSegue.title;
-    self.descriptionLabel.text = self.taskFromSegue.description;
+    self.descriptionLabel.text = self.taskFromSegue.desc;
     
     self.dateLabel.text = [self convertDateIntoString:self.taskFromSegue.date];
     
@@ -99,7 +99,7 @@
 - (void)updateTask
 {
     self.titleLabel.text = self.taskFromSegue.title;
-    self.descriptionLabel.text = self.taskFromSegue.description;
+    self.descriptionLabel.text = self.taskFromSegue.desc;
     self.dateLabel.text = [self convertDateIntoString:self.taskFromSegue.date];
     
     [self didUpdateTask];

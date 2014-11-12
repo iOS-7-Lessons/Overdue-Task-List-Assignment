@@ -25,7 +25,7 @@
         
         // initialization
         self.title = data[TASK_TITLE];
-        self.description = data[TASK_DESCRIPTION];
+        self.desc = data[TASK_DESCRIPTION];
         self.date = data[TASK_DATE];
         self.isCompleted = [data[TASK_COMPLETION] boolValue];
     }

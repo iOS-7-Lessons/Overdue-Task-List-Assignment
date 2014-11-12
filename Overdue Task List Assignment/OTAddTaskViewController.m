@@ -67,10 +67,10 @@
     OTTask *taskObject = [[OTTask alloc] init];
     
     taskObject.title = self.taskNameTextField.text;
-    taskObject.description = self.descriptionTextView.text;
+    taskObject.desc = self.descriptionTextView.text;
     taskObject.date = self.dueDatePicker.date;
     taskObject.isCompleted = NO;
-    
+
     return taskObject;
 }
 
