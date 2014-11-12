@@ -15,7 +15,9 @@
 #define TASK_DATE @"Task Date"
 #define TASK_COMPLETION @"Task Completion"
 
-#define ARRAY_OF_TASK_DICTIONARIES @"Array of task dictionaries"
+#define COMPLETED_TASK_OBJECT_KEY @"Completed task dictionaries"
+#define OVERDUE_TASK_OBJECT_KEY @"Overdue task dictionaries"
+#define INCOMPLETED_TASK_OBJECT_KEY @"Incompleted task dictionaries"
 
 #ifdef __OBJC__
     #import <UIKit/UIKit.h>

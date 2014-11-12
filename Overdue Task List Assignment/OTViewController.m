@@ -24,11 +24,32 @@
     // To reset NSUserDefaults
     // [[NSUserDefaults standardUserDefaults] removeObjectForKey:ARRAY_OF_TASK_DICTIONARIES];
     
-    NSArray *savedTasks = [[NSUserDefaults standardUserDefaults] arrayForKey:ARRAY_OF_TASK_DICTIONARIES];
+//    NSArray *savedTasks = [[NSUserDefaults standardUserDefaults] arrayForKey:ARRAY_OF_TASK_DICTIONARIES];
     
+//    for (NSDictionary *dictionary in savedTasks) {
+//        OTTask *task = [self returnTaskObjectFromDictionary:dictionary];
+//        
+//        BOOL isOverDue = [self isDateGreaterThanDate:[NSDate date] and:task.date];
+//        
+//        if (task.isCompleted) [self.completedTaskObjects addObject:task];
+//        else if (isOverDue) [self.overdueTaskObjects addObject:task];
+//        else [self.incompletedTaskObjects addObject:task];
+//    }
+    
+    NSArray *savedTasks = [[NSUserDefaults standardUserDefaults] arrayForKey:COMPLETED_TASK_OBJECT_KEY];
     for (NSDictionary *dictionary in savedTasks) {
         OTTask *task = [self returnTaskObjectFromDictionary:dictionary];
-        [self.taskObjects addObject:task];
+        [self.completedTaskObjects addObject:task];
+    }
+    savedTasks = [[NSUserDefaults standardUserDefaults] arrayForKey:OVERDUE_TASK_OBJECT_KEY];
+    for (NSDictionary *dictionary in savedTasks) {
+        OTTask *task = [self returnTaskObjectFromDictionary:dictionary];
+        [self.overdueTaskObjects addObject:task];
+    }
+    savedTasks = [[NSUserDefaults standardUserDefaults] arrayForKey:INCOMPLETED_TASK_OBJECT_KEY];
+    for (NSDictionary *dictionary in savedTasks) {
+        OTTask *task = [self returnTaskObjectFromDictionary:dictionary];
+        [self.incompletedTaskObjects addObject:task];
     }
     
     self.tableView.dataSource = self;
@@ -69,13 +90,37 @@
 
 - (void)didAddTask:(OTTask *)task
 {
-    [self.taskObjects addObject:task];
-    NSMutableArray *arrayToBeSaved = [[[NSUserDefaults standardUserDefaults] arrayForKey:ARRAY_OF_TASK_DICTIONARIES] mutableCopy];
+    BOOL isOverDue = [self isDateGreaterThanDate:[NSDate date] and:task.date];
     
-    if ( !arrayToBeSaved ) arrayToBeSaved = [[NSMutableArray alloc] init];
+    NSMutableArray *tasksArray;
+    if (task.isCompleted) {
+        [self.completedTaskObjects addObject:task];
+        tasksArray = [[[NSUserDefaults standardUserDefaults] arrayForKey:COMPLETED_TASK_OBJECT_KEY] mutableCopy];
+        if ( !tasksArray ) tasksArray = [[NSMutableArray alloc] init];
+        [tasksArray addObject:[self taskObjectAsAPropertyList:task]];
+        [[NSUserDefaults standardUserDefaults] setObject:tasksArray forKey:COMPLETED_TASK_OBJECT_KEY];
+    }
+    else if (isOverDue) {
+        [self.overdueTaskObjects addObject:task];
+        tasksArray = [[[NSUserDefaults standardUserDefaults] arrayForKey:OVERDUE_TASK_OBJECT_KEY] mutableCopy];
+        if ( !tasksArray ) tasksArray = [[NSMutableArray alloc] init];
+        [tasksArray addObject:[self taskObjectAsAPropertyList:task]];
+        [[NSUserDefaults standardUserDefaults] setObject:tasksArray forKey:OVERDUE_TASK_OBJECT_KEY];
+    }
+    else {
+        [self.incompletedTaskObjects addObject:task];
+        tasksArray = [[[NSUserDefaults standardUserDefaults] arrayForKey:INCOMPLETED_TASK_OBJECT_KEY] mutableCopy];
+        if ( !tasksArray ) tasksArray = [[NSMutableArray alloc] init];
+        [tasksArray addObject:[self taskObjectAsAPropertyList:task]];
+        [[NSUserDefaults standardUserDefaults] setObject:tasksArray forKey:INCOMPLETED_TASK_OBJECT_KEY];
+    }
     
-    [arrayToBeSaved addObject:[self taskObjectAsAPropertyList:task]];
-    [[NSUserDefaults standardUserDefaults] setObject:arrayToBeSaved forKey:ARRAY_OF_TASK_DICTIONARIES];
+//    NSMutableArray *arrayToBeSaved = [[[NSUserDefaults standardUserDefaults] arrayForKey:ARRAY_OF_TASK_DICTIONARIES] mutableCopy];
+//    
+//    if ( !arrayToBeSaved ) arrayToBeSaved = [[NSMutableArray alloc] init];
+//    
+//    [arrayToBeSaved addObject:[self taskObjectAsAPropertyList:task]];
+//    [[NSUserDefaults standardUserDefaults] setObject:arrayToBeSaved forKey:ARRAY_OF_TASK_DICTIONARIES];
     [[NSUserDefaults standardUserDefaults] synchronize];
     
     [self dismissViewControllerAnimated:YES completion:nil];
@@ -92,8 +137,25 @@
 
 - (void)didUpdateCompletedStatus:(OTTask *)task
 {
-    NSUInteger row = [self.taskObjects indexOfObject:task];
-    NSIndexPath *indexPath = [NSIndexPath indexPathForRow:row inSection:0];
+    BOOL isOverDue = [self isDateGreaterThanDate:[NSDate date] and:task.date];
+    
+    NSUInteger row;
+    NSIndexPath *indexPath;
+    if (task.isCompleted) {
+        row = [self.completedTaskObjects indexOfObject:task];
+        [NSIndexPath indexPathForRow:row inSection:0];
+    }
+    else if (isOverDue) {
+        row = [self.overdueTaskObjects indexOfObject:task];
+        [NSIndexPath indexPathForRow:row inSection:1];
+    }
+    else {
+        row = [self.incompletedTaskObjects indexOfObject:task];
+        [NSIndexPath indexPathForRow:row inSection:2];
+    }
+    
+//    NSUInteger row = [self.incompletedTaskObjects indexOfObject:task];
+//    NSIndexPath *indexPath = [NSIndexPath indexPathForRow:row inSection:0];
     
     [self updateCompletionOfTask:task forIndexPath:indexPath];
 }
@@ -120,7 +182,14 @@
             
             OTDetailTaskViewController *targetVC = segue.destinationViewController;
             NSIndexPath *indexPath = sender;
-            OTTask *task = self.taskObjects[indexPath.row];
+//            OTTask *task = self.incompletedTaskObjects[indexPath.row];
+            OTTask *task;
+            BOOL isOverDue = [self isDateGreaterThanDate:[NSDate date] and:task.date];
+            
+            if (task.isCompleted) task = self.completedTaskObjects[indexPath.row];
+            else if (isOverDue) task = self.overdueTaskObjects[indexPath.row];
+            else task = self.incompletedTaskObjects[indexPath.row];
+            
             targetVC.taskFromSegue = task;
             targetVC.delegate = self;
         }
@@ -131,46 +200,65 @@
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    return [self.taskObjects count];
+    switch (section) {
+        case 0:
+            return [self.completedTaskObjects count];
+            break;
+        case 1:
+            return [self.overdueTaskObjects count];
+            break;
+        case 2:
+            return [self.incompletedTaskObjects count];
+            break;
+    }
+    return 0;
 }
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
-    return 1;
+    return 3;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"TaskCell" forIndexPath:indexPath];
     
-    OTTask *task = self.taskObjects[indexPath.row];
+    OTTask *task;
+    switch (indexPath.section) {
+        case 0:
+            task = self.completedTaskObjects[indexPath.row];
+            cell.backgroundColor = [self colorWithR:255.0 G:0.0 B:0.0 A:0.1];
+            break;
+        case 1:
+            task = self.overdueTaskObjects[indexPath.row];
+            cell.backgroundColor = [self colorWithR:0.0 G:0.0 B:0.0 A:0.5];
+            break;
+        case 2:
+            task = self.incompletedTaskObjects[indexPath.row];
+            cell.backgroundColor = [self colorWithR:0.0 G:0.0 B:0.0 A:0.0];
+            break;
+    }
     
+//    OTTask *task = self.incompletedTaskObjects[indexPath.row];
+//    
     NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
     [formatter setDateFormat:@"yyyy-MM-dd 'at' HH:mm"];
-    
+//    
     cell.textLabel.text = [NSString stringWithFormat:@"%@", task.title ];
     cell.detailTextLabel.text = [formatter stringFromDate:task.date];
-    
-    // Compare due date with current date
-    NSDate *currentDate = [NSDate date];
-    NSDate *endDate = task.date;
-    
-    BOOL isOverDue = [self isDateGreaterThanDate:currentDate and:endDate];
-    
-    if ( task.isCompleted ) cell.backgroundColor = [self colorWithR:255.0 G:0.0 B:0.0 A:0.1];
-    else if ( isOverDue ) cell.backgroundColor = [self colorWithR:0.0 G:0.0 B:0.0 A:0.5];
-    else cell.backgroundColor = [self colorWithR:0.0 G:0.0 B:0.0 A:0.0];
-    
-    // Customize accessory disclosure
-    UIImage *image = [UIImage   imageNamed:@"info-35.png"];
-    UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
-    CGRect frame = CGRectMake(44.0, 44.0, image.size.width, image.size.height);
-    button.frame = frame;
-    [button setBackgroundImage:image forState:UIControlStateNormal];
-    
-    [button addTarget:self action:@selector(accessoryButtonTapped:event:)  forControlEvents:UIControlEventTouchUpInside];
-    button.backgroundColor = [UIColor clearColor];
-    cell.accessoryView = button;
+//    
+//    // Compare due date with current date
+//    NSDate *currentDate = [NSDate date];
+//    NSDate *endDate = task.date;
+//    
+//    BOOL isOverDue = [self isDateGreaterThanDate:currentDate and:endDate];
+//    
+//    if ( task.isCompleted ) cell.backgroundColor = [self colorWithR:255.0 G:0.0 B:0.0 A:0.1];
+//    else if ( isOverDue ) cell.backgroundColor = [self colorWithR:0.0 G:0.0 B:0.0 A:0.5];
+//    else cell.backgroundColor = [self colorWithR:0.0 G:0.0 B:0.0 A:0.0];
+//    
+//    // Customize accessory disclosure
+    cell.accessoryView = [self customizeAccessoryButton];
     
     return cell;
 }
@@ -179,7 +267,13 @@
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    OTTask *task = [self.taskObjects objectAtIndex:indexPath.row];
+//    OTTask *task = [self.incompletedTaskObjects objectAtIndex:indexPath.row];
+    OTTask *task;
+    BOOL isOverDue = [self isDateGreaterThanDate:[NSDate date] and:task.date];
+    
+    if (task.isCompleted) task = [self.completedTaskObjects objectAtIndex:indexPath.row];
+    else if (isOverDue) task = [self.overdueTaskObjects objectAtIndex:indexPath.row];
+    else task = [self.incompletedTaskObjects objectAtIndex:indexPath.row];
     
     // update NSUserDefault data
     [self updateCompletionOfTask:task forIndexPath:indexPath];
@@ -194,11 +288,27 @@
 {
     if ( editingStyle == UITableViewCellEditingStyleDelete) {
         
-        [self.taskObjects removeObjectAtIndex:indexPath.row];
-        
-        NSMutableArray *taskList = [[[NSUserDefaults standardUserDefaults] arrayForKey:ARRAY_OF_TASK_DICTIONARIES] mutableCopy];
-        [taskList removeObjectAtIndex:indexPath.row];
-        [[NSUserDefaults standardUserDefaults] setObject:taskList forKey:ARRAY_OF_TASK_DICTIONARIES];
+        NSMutableArray *taskList;
+        switch (indexPath.section) {
+            case 0:
+                [self.completedTaskObjects removeObjectAtIndex:indexPath.row];
+                taskList = [[[NSUserDefaults standardUserDefaults] arrayForKey:COMPLETED_TASK_OBJECT_KEY] mutableCopy];
+                [taskList removeObjectAtIndex:indexPath.row];
+                [[NSUserDefaults standardUserDefaults] setObject:taskList forKey:COMPLETED_TASK_OBJECT_KEY];
+                break;
+            case 1:
+                [self.overdueTaskObjects removeObjectAtIndex:indexPath.row];
+                taskList = [[[NSUserDefaults standardUserDefaults] arrayForKey:OVERDUE_TASK_OBJECT_KEY] mutableCopy];
+                [taskList removeObjectAtIndex:indexPath.row];
+                [[NSUserDefaults standardUserDefaults] setObject:taskList forKey:OVERDUE_TASK_OBJECT_KEY];
+                break;
+            case 2:
+                [self.incompletedTaskObjects removeObjectAtIndex:indexPath.row];
+                taskList = [[[NSUserDefaults standardUserDefaults] arrayForKey:INCOMPLETED_TASK_OBJECT_KEY] mutableCopy];
+                [taskList removeObjectAtIndex:indexPath.row];
+                [[NSUserDefaults standardUserDefaults] setObject:taskList forKey:INCOMPLETED_TASK_OBJECT_KEY];
+                break;
+        }
         [[NSUserDefaults standardUserDefaults] synchronize];
         
         [tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationFade];
@@ -219,26 +329,87 @@
 - (void)tableView:(UITableView *)tableView moveRowAtIndexPath:(NSIndexPath *)sourceIndexPath toIndexPath:(NSIndexPath *)destinationIndexPath
 {
     // Get the moved task
-    OTTask *movedTask = [self.taskObjects objectAtIndex:sourceIndexPath.row];
+//    OTTask *movedTask = [self.incompletedTaskObjects objectAtIndex:sourceIndexPath.row];
+//    
+//    // Arrange the self.incompletedTaskObjects
+//    [self.incompletedTaskObjects removeObjectAtIndex:sourceIndexPath.row];
+//    [self.incompletedTaskObjects insertObject:movedTask atIndex:destinationIndexPath.row];
     
-    // Arrange the self.taskObjects
-    [self.taskObjects removeObjectAtIndex:sourceIndexPath.row];
-    [self.taskObjects insertObject:movedTask atIndex:destinationIndexPath.row];
+    OTTask *movedTask;
+    
+    switch (sourceIndexPath.section) {
+        case 0:
+            movedTask = [self.completedTaskObjects objectAtIndex:sourceIndexPath.row];
+            
+            // Arrange the self.incompletedTaskObjects
+            [self.completedTaskObjects removeObjectAtIndex:sourceIndexPath.row];
+            [self.completedTaskObjects insertObject:movedTask atIndex:destinationIndexPath.row];
+            break;
+        case 1:
+            movedTask = [self.overdueTaskObjects objectAtIndex:sourceIndexPath.row];
+            
+            // Arrange the self.incompletedTaskObjects
+            [self.overdueTaskObjects removeObjectAtIndex:sourceIndexPath.row];
+            [self.overdueTaskObjects insertObject:movedTask atIndex:destinationIndexPath.row];
+            break;
+        case 2:
+            movedTask = [self.incompletedTaskObjects objectAtIndex:sourceIndexPath.row];
+            
+            // Arrange the self.incompletedTaskObjects
+            [self.incompletedTaskObjects removeObjectAtIndex:sourceIndexPath.row];
+            [self.incompletedTaskObjects insertObject:movedTask atIndex:destinationIndexPath.row];
+            break;
+    }
     
     [self saveTasks];
 }
 
-#pragma mark - Lazy instantiations
-
-- (NSMutableArray *)taskObjects
+- (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
 {
-    if ( !_taskObjects ) {
-        _taskObjects = [[ NSMutableArray alloc] init];
-    }
+    UILabel *label = [[UILabel alloc] init];
     
-    return _taskObjects;
+    switch (section) {
+        case 0:
+            [label setText:[NSString stringWithFormat:@"Completed Tasks"]];
+            break;
+        case 1:
+            [label setText:[NSString stringWithFormat:@"Overdue Tasks"]];
+            break;
+        case 2:
+            [label setText:[NSString stringWithFormat:@"Incompleted Tasks"]];
+            break;
+    }
+    return label;
 }
 
+#pragma mark - Lazy instantiations
+
+- (NSMutableArray *)incompletedTaskObjects
+{
+    if ( !_incompletedTaskObjects ) {
+        _incompletedTaskObjects = [[ NSMutableArray alloc] init];
+    }
+    
+    return _incompletedTaskObjects;
+}
+
+- (NSMutableArray *)completedTaskObjects
+{
+    if ( !_completedTaskObjects ) {
+        _completedTaskObjects = [[ NSMutableArray alloc] init];
+    }
+    
+    return _completedTaskObjects;
+}
+
+- (NSMutableArray *)overdueTaskObjects
+{
+    if ( !_overdueTaskObjects ) {
+        _overdueTaskObjects = [[ NSMutableArray alloc] init];
+    }
+    
+    return _overdueTaskObjects;
+}
 #pragma mark - Helper Methods
 
 - (NSDictionary *)taskObjectAsAPropertyList:(OTTask *)taskObject
@@ -269,25 +440,60 @@
 
 - (void)updateCompletionOfTask:(OTTask *)task forIndexPath:(NSIndexPath *)indexPath
 {
-//    [self.taskObjects removeObjectAtIndex:indexPath.row];
-//    NSLog(@"%@", self.taskObjects);
-//    [self.taskObjects insertObject:task atIndex:indexPath.row];
-//    NSLog(@"%@", self.taskObjects);
     
-    NSMutableArray *taskObjectsAsPropertyList = [[[NSUserDefaults standardUserDefaults] arrayForKey:ARRAY_OF_TASK_DICTIONARIES] mutableCopy];
-    
-    if ( !taskObjectsAsPropertyList ) taskObjectsAsPropertyList = [[NSMutableArray alloc] init];
-    
-    [taskObjectsAsPropertyList removeObjectAtIndex:indexPath.row];
-//    NSLog(@"%@", taskObjectsAsPropertyList);
+//    NSMutableArray *incompletedTaskObjectsAsPropertyList = [[[NSUserDefaults standardUserDefaults] arrayForKey:ARRAY_OF_TASK_DICTIONARIES] mutableCopy];
+//    
+//    if ( !incompletedTaskObjectsAsPropertyList ) incompletedTaskObjectsAsPropertyList = [[NSMutableArray alloc] init];
+//    
+//    [incompletedTaskObjectsAsPropertyList removeObjectAtIndex:indexPath.row];
+//    
+//    if ( task.isCompleted == YES ) task.isCompleted = NO;
+//    else task.isCompleted = YES;
+//    
+//    [incompletedTaskObjectsAsPropertyList insertObject:[self taskObjectAsAPropertyList:task] atIndex:indexPath.row];
+//    
+//    [[NSUserDefaults standardUserDefaults] setObject:incompletedTaskObjectsAsPropertyList forKey:ARRAY_OF_TASK_DICTIONARIES];
     
     if ( task.isCompleted == YES ) task.isCompleted = NO;
-    else task.isCompleted = YES;
+        else task.isCompleted = YES;
     
-    [taskObjectsAsPropertyList insertObject:[self taskObjectAsAPropertyList:task] atIndex:indexPath.row];
-//    NSLog(@"%@", taskObjectsAsPropertyList);
+    NSMutableArray *taskObjectsAsPropertyList;
+    switch (indexPath.section) {
+        case 0:
+            taskObjectsAsPropertyList = [[[NSUserDefaults standardUserDefaults]
+                                          arrayForKey:COMPLETED_TASK_OBJECT_KEY]
+                                         mutableCopy];
+            if ( !taskObjectsAsPropertyList ) taskObjectsAsPropertyList = [[NSMutableArray alloc] init];
+            [taskObjectsAsPropertyList removeObjectAtIndex:indexPath.row];
+            [taskObjectsAsPropertyList insertObject:[self taskObjectAsAPropertyList:task]
+                                            atIndex:indexPath.row];
+            [[NSUserDefaults standardUserDefaults] setObject:taskObjectsAsPropertyList
+                                                      forKey:COMPLETED_TASK_OBJECT_KEY];
+            break;
+        case 1:
+            taskObjectsAsPropertyList = [[[NSUserDefaults standardUserDefaults]
+                                          arrayForKey:OVERDUE_TASK_OBJECT_KEY]
+                                         mutableCopy];
+            if ( !taskObjectsAsPropertyList ) taskObjectsAsPropertyList = [[NSMutableArray alloc] init];
+            [taskObjectsAsPropertyList removeObjectAtIndex:indexPath.row];
+            [taskObjectsAsPropertyList insertObject:[self taskObjectAsAPropertyList:task]
+                                            atIndex:indexPath.row];
+            [[NSUserDefaults standardUserDefaults] setObject:taskObjectsAsPropertyList
+                                                      forKey:OVERDUE_TASK_OBJECT_KEY];
+            break;
+        case 2:
+            taskObjectsAsPropertyList = [[[NSUserDefaults standardUserDefaults]
+                                          arrayForKey:INCOMPLETED_TASK_OBJECT_KEY]
+                                         mutableCopy];
+            if ( !taskObjectsAsPropertyList ) taskObjectsAsPropertyList = [[NSMutableArray alloc] init];
+            [taskObjectsAsPropertyList removeObjectAtIndex:indexPath.row];
+            [taskObjectsAsPropertyList insertObject:[self taskObjectAsAPropertyList:task]
+                                            atIndex:indexPath.row];
+            [[NSUserDefaults standardUserDefaults] setObject:taskObjectsAsPropertyList
+                                                      forKey:INCOMPLETED_TASK_OBJECT_KEY];
+            break;
+    }
     
-    [[NSUserDefaults standardUserDefaults] setObject:taskObjectsAsPropertyList forKey:ARRAY_OF_TASK_DICTIONARIES];
     [[NSUserDefaults standardUserDefaults] synchronize];
     
     [self.tableView reloadData];
@@ -297,12 +503,30 @@
 {
     NSMutableArray *tasksArray = [[NSMutableArray alloc] init];
     
-    for (OTTask *taskObject in self.taskObjects) {
+//    for (OTTask *taskObject in self.incompletedTaskObjects) {
+//        [tasksArray addObject:[self taskObjectAsAPropertyList:taskObject]];
+//    }
+//    
+//    // Save array into NSUserDefaults
+//    [[NSUserDefaults standardUserDefaults] setObject:tasksArray forKey:ARRAY_OF_TASK_DICTIONARIES];
+    
+    for (OTTask *taskObject in self.completedTaskObjects) {
         [tasksArray addObject:[self taskObjectAsAPropertyList:taskObject]];
     }
+    [[NSUserDefaults standardUserDefaults] setObject:tasksArray forKey:COMPLETED_TASK_OBJECT_KEY];
     
-    // Save array into NSUserDefaults
-    [[NSUserDefaults standardUserDefaults] setObject:tasksArray forKey:ARRAY_OF_TASK_DICTIONARIES];
+    [tasksArray removeAllObjects];
+    for (OTTask *taskObject in self.overdueTaskObjects) {
+        [tasksArray addObject:[self taskObjectAsAPropertyList:taskObject]];
+    }
+    [[NSUserDefaults standardUserDefaults] setObject:tasksArray forKey:OVERDUE_TASK_OBJECT_KEY];
+    
+    [tasksArray removeAllObjects];
+    for (OTTask *taskObject in self.incompletedTaskObjects) {
+        [tasksArray addObject:[self taskObjectAsAPropertyList:taskObject]];
+    }
+    [[NSUserDefaults standardUserDefaults] setObject:tasksArray forKey:INCOMPLETED_TASK_OBJECT_KEY];
+    
     [[NSUserDefaults standardUserDefaults] synchronize];
 }
 
@@ -321,6 +545,20 @@
 
 - (UIColor *)colorWithR:(CGFloat)red G:(CGFloat)green B:(CGFloat)blue A:(CGFloat)alpha {
     return [UIColor colorWithRed:(red/255.0) green:(green/255.0) blue:(blue/255.0) alpha:alpha];
+}
+
+- (UIButton *)customizeAccessoryButton
+{
+    // Customize accessory disclosure
+    UIImage *image = [UIImage imageNamed:@"info-35.png"];
+    UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
+    CGRect frame = CGRectMake(44.0, 44.0, image.size.width, image.size.height);
+    button.frame = frame;
+    [button setBackgroundImage:image forState:UIControlStateNormal];
+    
+    [button addTarget:self action:@selector(accessoryButtonTapped:event:)  forControlEvents:UIControlEventTouchUpInside];
+    button.backgroundColor = [UIColor clearColor];
+    return button;
 }
 
 @end

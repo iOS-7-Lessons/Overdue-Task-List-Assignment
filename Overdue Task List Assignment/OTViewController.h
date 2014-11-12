@@ -14,7 +14,9 @@
 @interface OTViewController : UIViewController <OTAddTaskViewControllerDelegate, UITableViewDataSource, UITableViewDelegate, OTDetailTaskViewControllerDelegate>
 
 // Properties
-@property (strong, nonatomic) NSMutableArray *taskObjects;
+@property (strong, nonatomic) NSMutableArray *incompletedTaskObjects;
+@property (strong, nonatomic) NSMutableArray *completedTaskObjects;
+@property (strong, nonatomic) NSMutableArray *overdueTaskObjects;
 
 // IBOutlets
 @property (weak, nonatomic) IBOutlet UITableView *tableView;
