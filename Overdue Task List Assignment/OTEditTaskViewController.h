@@ -13,6 +13,7 @@
 
 @required;
 - (void)updateTask;
+- (void)updateCompletedStatus:(OTTask *)task;
 
 @end
 
@@ -32,5 +33,6 @@
 
 // IBActions
 - (IBAction)saveButtonPressed:(UIBarButtonItem *)sender;
+- (IBAction)chnageCompleteStatusButtonPressed:(UIButton *)sender;
 
 @end

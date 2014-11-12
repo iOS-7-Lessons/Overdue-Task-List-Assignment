@@ -27,7 +27,6 @@
 		F93F9C471A0FC29B00DAE971 /* OTTask.m in Sources */ = {isa = PBXBuildFile; fileRef = F93F9C461A0FC29B00DAE971 /* OTTask.m */; };
 		F98159791A12C68600EE926F /* info-35.png in Resources */ = {isa = PBXBuildFile; fileRef = F98159781A12C68600EE926F /* info-35.png */; };
 		F9D29C9D1A1273D90065F498 /* background-image.jpg in Resources */ = {isa = PBXBuildFile; fileRef = F9D29C9C1A1273D90065F498 /* background-image.jpg */; };
-		F9D29CA91A1299350065F498 /* UnderLineLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = F9D29CA81A1299350065F498 /* UnderLineLabel.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -70,8 +69,6 @@
 		F93F9C461A0FC29B00DAE971 /* OTTask.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = OTTask.m; path = "Overdue Task List Assignment/OTTask.m"; sourceTree = "<group>"; };
 		F98159781A12C68600EE926F /* info-35.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "info-35.png"; sourceTree = "<group>"; };
 		F9D29C9C1A1273D90065F498 /* background-image.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "background-image.jpg"; sourceTree = "<group>"; };
-		F9D29CA71A1299350065F498 /* UnderLineLabel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UnderLineLabel.h; sourceTree = "<group>"; };
-		F9D29CA81A1299350065F498 /* UnderLineLabel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UnderLineLabel.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -183,21 +180,11 @@
 		F93F9C481A0FC2A200DAE971 /* Models */ = {
 			isa = PBXGroup;
 			children = (
-				F9D29CA61A1299350065F498 /* UnderLineLabel */,
 				F93F9C451A0FC29B00DAE971 /* OTTask.h */,
 				F93F9C461A0FC29B00DAE971 /* OTTask.m */,
 			);
 			name = Models;
 			path = ..;
-			sourceTree = "<group>";
-		};
-		F9D29CA61A1299350065F498 /* UnderLineLabel */ = {
-			isa = PBXGroup;
-			children = (
-				F9D29CA71A1299350065F498 /* UnderLineLabel.h */,
-				F9D29CA81A1299350065F498 /* UnderLineLabel.m */,
-			);
-			path = UnderLineLabel;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -301,7 +288,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				F93F9C141A0FB71100DAE971 /* main.m in Sources */,
-				F9D29CA91A1299350065F498 /* UnderLineLabel.m in Sources */,
 				F93F9C181A0FB71100DAE971 /* OTAppDelegate.m in Sources */,
 				F93F9C411A0FB87500DAE971 /* OTDetailTaskViewController.m in Sources */,
 				F93F9C3E1A0FB85000DAE971 /* OTAddTaskViewController.m in Sources */,

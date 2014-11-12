@@ -9,7 +9,6 @@
 #import "OTViewController.h"
 #import "OTAddTaskViewController.h"
 #import "OTDetailTaskViewController.h"
-#import "UnderLineLabel.h"
 
 @interface OTViewController ()
 
@@ -89,6 +88,14 @@
 {
     [self saveTasks];
     [self.tableView reloadData];
+}
+
+- (void)didUpdateCompletedStatus:(OTTask *)task
+{
+    NSUInteger row = [self.taskObjects indexOfObject:task];
+    NSIndexPath *indexPath = [NSIndexPath indexPathForRow:row inSection:0];
+    
+    [self updateCompletionOfTask:task forIndexPath:indexPath];
 }
 
 #pragma mark - Navigation
@@ -272,13 +279,13 @@
     if ( !taskObjectsAsPropertyList ) taskObjectsAsPropertyList = [[NSMutableArray alloc] init];
     
     [taskObjectsAsPropertyList removeObjectAtIndex:indexPath.row];
-    NSLog(@"%@", taskObjectsAsPropertyList);
+//    NSLog(@"%@", taskObjectsAsPropertyList);
     
     if ( task.isCompleted == YES ) task.isCompleted = NO;
     else task.isCompleted = YES;
     
     [taskObjectsAsPropertyList insertObject:[self taskObjectAsAPropertyList:task] atIndex:indexPath.row];
-    NSLog(@"%@", taskObjectsAsPropertyList);
+//    NSLog(@"%@", taskObjectsAsPropertyList);
     
     [[NSUserDefaults standardUserDefaults] setObject:taskObjectsAsPropertyList forKey:ARRAY_OF_TASK_DICTIONARIES];
     [[NSUserDefaults standardUserDefaults] synchronize];

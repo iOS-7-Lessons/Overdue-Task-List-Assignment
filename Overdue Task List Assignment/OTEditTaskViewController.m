@@ -45,6 +45,9 @@
     self.descriptionTextView.layer.borderWidth = 1.0;
     self.descriptionTextView.layer.borderColor = [[UIColor darkGrayColor] CGColor];
     //self.dateDatePicker.layer.borderWidth = 1.0;
+    
+    // Adjust textField's tint
+    [[UITextField appearance] setTintColor:[UIColor whiteColor]];
 }
 
 - (void)didReceiveMemoryWarning
@@ -61,6 +64,17 @@
     
     [self updateTask];
     [self.navigationController popViewControllerAnimated:YES];
+}
+
+- (IBAction)chnageCompleteStatusButtonPressed:(UIButton *)sender {
+    [self updateCompletedStatus:self.taskFromSegue];
+}
+
+#pragma mark - OTEditTaskViewControllerDelegate
+
+- (void)updateCompletedStatus:(OTTask *)task
+{
+    [self.delegate updateCompletedStatus:task];
 }
 
 - (void)updateTask

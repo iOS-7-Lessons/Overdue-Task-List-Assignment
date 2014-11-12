@@ -14,6 +14,7 @@
 
 @required
 - (void)didUpdateTask;
+- (void)didUpdateCompletedStatus:(OTTask *)task;
 
 @end
 

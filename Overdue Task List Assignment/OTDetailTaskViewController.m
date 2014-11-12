@@ -69,7 +69,7 @@
 }
 
 - (IBAction)changeCompleteStatusButtonPressed:(UIButton *)sender {
-    
+    [self didUpdateCompletedStatus:self.taskFromSegue];
 }
 
 #pragma mark - Helper Methods
@@ -105,11 +105,21 @@
     [self didUpdateTask];
 }
 
+- (void)updateCompletedStatus:(OTTask *)task
+{
+    [self.delegate didUpdateCompletedStatus:task];
+}
+
 #pragma mark - OTDetailTaskViewControllerDelegate
 
 - (void)didUpdateTask
 {
     [self.delegate didUpdateTask];
+}
+
+- (void)didUpdateCompletedStatus:(OTTask *)task
+{
+    [self.delegate didUpdateCompletedStatus:task];
 }
 
 @end
