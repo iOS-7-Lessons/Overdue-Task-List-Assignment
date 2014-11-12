@@ -31,6 +31,7 @@
     
     self.titleLabel.text = self.taskFromSegue.title;
     self.descriptionLabel.text = self.taskFromSegue.description;
+    
     self.dateLabel.text = [self convertDateIntoString:self.taskFromSegue.date];
     
     // Adjust background
@@ -73,7 +74,7 @@
 {
     NSString *string = [[NSString alloc] init];
     NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
-    [dateFormatter setDateFormat:@"yyyy-MM-dd"];
+    [dateFormatter setDateFormat:@"yyyy-MM-dd 'at' HH:mm"];
     string = [dateFormatter stringFromDate:self.taskFromSegue.date];
     
     return string;
