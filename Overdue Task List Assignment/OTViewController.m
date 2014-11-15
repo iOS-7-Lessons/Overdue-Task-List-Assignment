@@ -24,18 +24,6 @@
     // To reset NSUserDefaults
     // [[NSUserDefaults standardUserDefaults] removeObjectForKey:ARRAY_OF_TASK_DICTIONARIES];
     
-//    NSArray *savedTasks = [[NSUserDefaults standardUserDefaults] arrayForKey:ARRAY_OF_TASK_DICTIONARIES];
-    
-//    for (NSDictionary *dictionary in savedTasks) {
-//        OTTask *task = [self returnTaskObjectFromDictionary:dictionary];
-//        
-//        BOOL isOverDue = [self isDateGreaterThanDate:[NSDate date] and:task.date];
-//        
-//        if (task.isCompleted) [self.completedTaskObjects addObject:task];
-//        else if (isOverDue) [self.overdueTaskObjects addObject:task];
-//        else [self.incompletedTaskObjects addObject:task];
-//    }
-    
     NSArray *savedTasks = [[NSUserDefaults standardUserDefaults] arrayForKey:COMPLETED_TASK_OBJECT_KEY];
     for (NSDictionary *dictionary in savedTasks) {
         OTTask *task = [self returnTaskObjectFromDictionary:dictionary];
@@ -183,12 +171,24 @@
             OTDetailTaskViewController *targetVC = segue.destinationViewController;
             NSIndexPath *indexPath = sender;
 //            OTTask *task = self.incompletedTaskObjects[indexPath.row];
-            OTTask *task;
-            BOOL isOverDue = [self isDateGreaterThanDate:[NSDate date] and:task.date];
+            OTTask *task = [[OTTask alloc] init];
+//            BOOL isOverDue = [self isDateGreaterThanDate:[NSDate date] and:task.date];
             
-            if (task.isCompleted) task = self.completedTaskObjects[indexPath.row];
-            else if (isOverDue) task = self.overdueTaskObjects[indexPath.row];
-            else task = self.incompletedTaskObjects[indexPath.row];
+//            if (task.isCompleted) task = self.completedTaskObjects[indexPath.row];
+//            else if (isOverDue) task = self.overdueTaskObjects[indexPath.row];
+//            else task = self.incompletedTaskObjects[indexPath.row];
+            
+            switch (indexPath.section) {
+                case 0:
+                    task = self.completedTaskObjects[indexPath.row];
+                    break;
+                case 1:
+                    task = self.overdueTaskObjects[indexPath.row];
+                    break;
+                case 2:
+                    task = self.incompletedTaskObjects[indexPath.row];
+                    break;
+            }
             
             targetVC.taskFromSegue = task;
             targetVC.delegate = self;
@@ -268,12 +268,24 @@
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
 //    OTTask *task = [self.incompletedTaskObjects objectAtIndex:indexPath.row];
-    OTTask *task;
-    BOOL isOverDue = [self isDateGreaterThanDate:[NSDate date] and:task.date];
+    OTTask *task = [[OTTask alloc] init];
+//    BOOL isOverDue = [self isDateGreaterThanDate:[NSDate date] and:task.date];
     
-    if (task.isCompleted) task = [self.completedTaskObjects objectAtIndex:indexPath.row];
-    else if (isOverDue) task = [self.overdueTaskObjects objectAtIndex:indexPath.row];
-    else task = [self.incompletedTaskObjects objectAtIndex:indexPath.row];
+//    if (task.isCompleted) task = [self.completedTaskObjects objectAtIndex:indexPath.row];
+//    else if (isOverDue) task = [self.overdueTaskObjects objectAtIndex:indexPath.row];
+//    else task = [self.incompletedTaskObjects objectAtIndex:indexPath.row];
+    
+    switch (indexPath.section) {
+        case 0:
+            task = [self.completedTaskObjects objectAtIndex:indexPath.row];
+            break;
+        case 1:
+            task = [self.overdueTaskObjects objectAtIndex:indexPath.row];
+            break;
+        case 2:
+            task = [self.incompletedTaskObjects objectAtIndex:indexPath.row];
+            break;
+    }
     
     // update NSUserDefault data
     [self updateCompletionOfTask:task forIndexPath:indexPath];
@@ -439,95 +451,171 @@
     return NO;
 }
 
-- (void)updateCompletionOfTask:(OTTask *)task forIndexPath:(NSIndexPath *)indexPath
-{
+- (void)updateCompletionOfTask:(OTTask *)task forIndexPath:(NSIndexPath *)indexPath{
     
-//    NSMutableArray *incompletedTaskObjectsAsPropertyList = [[[NSUserDefaults standardUserDefaults] arrayForKey:ARRAY_OF_TASK_DICTIONARIES] mutableCopy];
-//    
-//    if ( !incompletedTaskObjectsAsPropertyList ) incompletedTaskObjectsAsPropertyList = [[NSMutableArray alloc] init];
-//    
-//    [incompletedTaskObjectsAsPropertyList removeObjectAtIndex:indexPath.row];
-//    
-//    if ( task.isCompleted == YES ) task.isCompleted = NO;
-//    else task.isCompleted = YES;
-//    
-//    [incompletedTaskObjectsAsPropertyList insertObject:[self taskObjectAsAPropertyList:task] atIndex:indexPath.row];
-//    
-//    [[NSUserDefaults standardUserDefaults] setObject:incompletedTaskObjectsAsPropertyList forKey:ARRAY_OF_TASK_DICTIONARIES];
+    // KALDIR
+    
+    BOOL isOverDue = [self isDateGreaterThanDate:[NSDate date] and:task.date];
+    
+    [self tableView:self.tableView commitEditingStyle:UITableViewCellEditingStyleDelete forRowAtIndexPath:indexPath];
     
     if ( task.isCompleted == YES ) task.isCompleted = NO;
         else task.isCompleted = YES;
     
+    // EKLE
+    
     NSMutableArray *taskObjectsAsPropertyList;
-    switch (indexPath.section) {
-        case 0:
+    
+    if (task.isCompleted) {
+        [self.completedTaskObjects addObject:task];
             taskObjectsAsPropertyList = [[[NSUserDefaults standardUserDefaults]
                                           arrayForKey:COMPLETED_TASK_OBJECT_KEY]
                                          mutableCopy];
-            if ( !taskObjectsAsPropertyList ) taskObjectsAsPropertyList = [[NSMutableArray alloc] init];
-            [taskObjectsAsPropertyList removeObjectAtIndex:indexPath.row];
-            [taskObjectsAsPropertyList insertObject:[self taskObjectAsAPropertyList:task]
-                                            atIndex:indexPath.row];
+           // if ( !taskObjectsAsPropertyList ) taskObjectsAsPropertyList = [[NSMutableArray alloc] init];
+            //[taskObjectsAsPropertyList removeObjectAtIndex:indexPath.row];
+            [taskObjectsAsPropertyList addObject:[self taskObjectAsAPropertyList:task]];
             [[NSUserDefaults standardUserDefaults] setObject:taskObjectsAsPropertyList
                                                       forKey:COMPLETED_TASK_OBJECT_KEY];
-            break;
-        case 1:
+    }
+    else if (isOverDue) {
+        [self.overdueTaskObjects addObject:task];
             taskObjectsAsPropertyList = [[[NSUserDefaults standardUserDefaults]
                                           arrayForKey:OVERDUE_TASK_OBJECT_KEY]
                                          mutableCopy];
-            if ( !taskObjectsAsPropertyList ) taskObjectsAsPropertyList = [[NSMutableArray alloc] init];
-            [taskObjectsAsPropertyList removeObjectAtIndex:indexPath.row];
-            [taskObjectsAsPropertyList insertObject:[self taskObjectAsAPropertyList:task]
-                                            atIndex:indexPath.row];
+            //if ( !taskObjectsAsPropertyList ) taskObjectsAsPropertyList = [[NSMutableArray alloc] init];
+            //[taskObjectsAsPropertyList removeObjectAtIndex:indexPath.row];
+            [taskObjectsAsPropertyList addObject:[self taskObjectAsAPropertyList:task]];
             [[NSUserDefaults standardUserDefaults] setObject:taskObjectsAsPropertyList
                                                       forKey:OVERDUE_TASK_OBJECT_KEY];
-            break;
-        case 2:
+    }
+    else {
+        NSLog(@"incompleted : %@", self.incompletedTaskObjects);
+        [self.incompletedTaskObjects addObject:task];
             taskObjectsAsPropertyList = [[[NSUserDefaults standardUserDefaults]
                                           arrayForKey:INCOMPLETED_TASK_OBJECT_KEY]
                                          mutableCopy];
-            if ( !taskObjectsAsPropertyList ) taskObjectsAsPropertyList = [[NSMutableArray alloc] init];
-            [taskObjectsAsPropertyList removeObjectAtIndex:indexPath.row];
-            [taskObjectsAsPropertyList insertObject:[self taskObjectAsAPropertyList:task]
-                                            atIndex:indexPath.row];
+           // if ( !taskObjectsAsPropertyList ) taskObjectsAsPropertyList = [[NSMutableArray alloc] init];
+            //[taskObjectsAsPropertyList removeObjectAtIndex:indexPath.row];
+            [taskObjectsAsPropertyList addObject:[self taskObjectAsAPropertyList:task]];
             [[NSUserDefaults standardUserDefaults] setObject:taskObjectsAsPropertyList
                                                       forKey:INCOMPLETED_TASK_OBJECT_KEY];
-            break;
     }
     
-    [[NSUserDefaults standardUserDefaults] synchronize];
+    // TEST
+    NSLog(@"completed : %@", self.completedTaskObjects);
+    NSLog(@"overdue : %@", self.overdueTaskObjects);
+    NSLog(@"incompleted : %@", self.incompletedTaskObjects);
     
+    [[NSUserDefaults standardUserDefaults] synchronize];
     [self.tableView reloadData];
 }
 
 - (void)saveTasks
 {
-    NSMutableArray *tasksArray = [[NSMutableArray alloc] init];
     
-//    for (OTTask *taskObject in self.incompletedTaskObjects) {
-//        [tasksArray addObject:[self taskObjectAsAPropertyList:taskObject]];
-//    }
-//    
-//    // Save array into NSUserDefaults
-//    [[NSUserDefaults standardUserDefaults] setObject:tasksArray forKey:ARRAY_OF_TASK_DICTIONARIES];
+    // Arrayleri düzenle
+    //    BOOL isOverDue = [self isDateGreaterThanDate:[NSDate date] and:task.date];
+    //    NSMutableArray *tasksArray;
+    //
+    //    if (task.isCompleted) {
+    //    }
+    //    else if (isOverDue) {
+    //    }
+    //    else {
+    //    }
+    
+    NSMutableArray *completedCopy = [self.completedTaskObjects copy];
+    NSLog(@"completed :%@", self.completedTaskObjects);
+    for (OTTask *task in completedCopy) {
+        
+        if ( !task.isCompleted ) {
+            
+            // Kaldır
+            [self.completedTaskObjects removeObject:task];
+           
+            // Ekle
+            BOOL isOverDue = [self isDateGreaterThanDate:[NSDate date] and:task.date];
+            if (isOverDue) {
+                [self.overdueTaskObjects addObject:task];
+            } else {
+                [self.incompletedTaskObjects addObject:task];
+            }
+        }
+    }
+    NSLog(@"completed :%@", self.completedTaskObjects);
+    
+    NSMutableArray *overdueCopy = [self.overdueTaskObjects copy];
+    NSLog(@"overdue :%@", self.overdueTaskObjects);
+    for (OTTask *task in overdueCopy) {
+        BOOL isOverDue = [self isDateGreaterThanDate:[NSDate date] and:task.date];
+        if ( !isOverDue ) {
+            
+            // Kaldır
+            [self.overdueTaskObjects removeObject:task];
+            
+            // Ekle
+            if ( task.isCompleted ) {
+                [self.completedTaskObjects addObject:task];
+            } else {
+                [self.incompletedTaskObjects addObject:task];
+            }
+        }
+    }
+    NSLog(@"overdue :%@", self.overdueTaskObjects);
+    
+    NSMutableArray *incompletedCopy = [self.incompletedTaskObjects copy];
+    NSLog(@"incompleted :%@", self.incompletedTaskObjects);
+    for ( OTTask *task in incompletedCopy ) {
+        
+        BOOL isOverDue = [self isDateGreaterThanDate:[NSDate date] and:task.date];
+        if ( task.isCompleted ) {
+            
+            // Kaldır
+            [self.incompletedTaskObjects removeObject:task];
+            
+            // Ekle
+            if ( isOverDue ) {
+                [self.overdueTaskObjects addObject:task];
+            } else {
+                [self.incompletedTaskObjects addObject:task];
+            }
+        }
+        else if ( isOverDue ) {
+            // Kaldır
+            [self.incompletedTaskObjects removeObject:task];
+            // Ekle
+            [self.overdueTaskObjects addObject:task];
+            continue;
+        }
+    }
+    NSLog(@"incompleted :%@", self.incompletedTaskObjects);
+    
+    // Duzenlenmis arrayleri nsuserdefaults a kaydet
+    NSMutableArray *tasksArray = [[NSMutableArray alloc] init];
     
     for (OTTask *taskObject in self.completedTaskObjects) {
         [tasksArray addObject:[self taskObjectAsAPropertyList:taskObject]];
     }
     [[NSUserDefaults standardUserDefaults] setObject:tasksArray forKey:COMPLETED_TASK_OBJECT_KEY];
+    NSLog(@"completed :%@", self.completedTaskObjects);
+    NSLog(@"completed nsdefaults :%@", tasksArray);
     
     [tasksArray removeAllObjects];
     for (OTTask *taskObject in self.overdueTaskObjects) {
         [tasksArray addObject:[self taskObjectAsAPropertyList:taskObject]];
     }
     [[NSUserDefaults standardUserDefaults] setObject:tasksArray forKey:OVERDUE_TASK_OBJECT_KEY];
+    NSLog(@"overdue :%@", self.completedTaskObjects);
+    NSLog(@"overdue nsdefaults :%@", tasksArray);
     
     [tasksArray removeAllObjects];
     for (OTTask *taskObject in self.incompletedTaskObjects) {
         [tasksArray addObject:[self taskObjectAsAPropertyList:taskObject]];
     }
     [[NSUserDefaults standardUserDefaults] setObject:tasksArray forKey:INCOMPLETED_TASK_OBJECT_KEY];
-    
+    NSLog(@"incompleted :%@", self.completedTaskObjects);
+    NSLog(@"incompleted nsdefaults :%@", tasksArray);
+
     [[NSUserDefaults standardUserDefaults] synchronize];
 }
 
