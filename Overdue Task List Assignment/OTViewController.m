@@ -119,6 +119,7 @@
 
 - (void)didUpdateTask
 {
+    [self cleanupArrays];
     [self saveTasks];
     [self.tableView reloadData];
 }
@@ -510,20 +511,11 @@
     [self.tableView reloadData];
 }
 
-- (void)saveTasks
+/*
+ Arrayleri düzenle
+*/
+- (void)cleanupArrays
 {
-    
-    // Arrayleri düzenle
-    //    BOOL isOverDue = [self isDateGreaterThanDate:[NSDate date] and:task.date];
-    //    NSMutableArray *tasksArray;
-    //
-    //    if (task.isCompleted) {
-    //    }
-    //    else if (isOverDue) {
-    //    }
-    //    else {
-    //    }
-    
     NSMutableArray *completedCopy = [self.completedTaskObjects copy];
     NSLog(@"completed :%@", self.completedTaskObjects);
     for (OTTask *task in completedCopy) {
@@ -532,7 +524,7 @@
             
             // Kaldır
             [self.completedTaskObjects removeObject:task];
-           
+            
             // Ekle
             BOOL isOverDue = [self isDateGreaterThanDate:[NSDate date] and:task.date];
             if (isOverDue) {
@@ -589,6 +581,10 @@
         }
     }
     NSLog(@"incompleted :%@", self.incompletedTaskObjects);
+}
+
+- (void)saveTasks
+{
     
     // Duzenlenmis arrayleri nsuserdefaults a kaydet
     NSMutableArray *tasksArray = [[NSMutableArray alloc] init];
